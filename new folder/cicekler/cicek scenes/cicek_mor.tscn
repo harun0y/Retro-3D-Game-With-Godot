@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://new folder/cicekler/cicek_mor.glb" type="PackedScene" id=1]
+
+[node name="cicek_mor" instance=ExtResource( 1 )]

@@ -1,0 +1,11 @@
+[gd_scene format=2]
+
+[node name="Item" type="Node2D"]
+
+[node name="ItemList" type="ItemList" parent="."]
+margin_right = 394.0
+margin_bottom = 599.0
+items = [ "Item 1", null, false, "Item 2", null, false, "Item 3", null, false, "Item 4", null, false, "Item 5", null, false, "Item 6", null, false, "Item 7", null, false, "Item 8", null, false ]
+__meta__ = {
+"_edit_use_anchors_": false
+}

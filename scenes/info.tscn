@@ -1,0 +1,118 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://new folder/levels/info.gd" type="Script" id=1]
+[ext_resource path="res://Inventory/simya/siseler/basitcan.png" type="Texture" id=4]
+[ext_resource path="res://Inventory/simya/siseler/basitdayaniklilik.png" type="Texture" id=5]
+[ext_resource path="res://Inventory/simya/siseler/su dolu sise.png" type="Texture" id=6]
+[ext_resource path="res://Inventory/simya/siseler/dayaniklilik.png" type="Texture" id=7]
+[ext_resource path="res://Inventory/simya/siseler/can.png" type="Texture" id=8]
+
+[node name="infoUI" type="Node2D"]
+position = Vector2( 390.323, 568.514 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_horizontal_guides_": [ 1084.98 ],
+"_edit_lock_": true,
+"_edit_vertical_guides_": [ 1919.24 ]
+}
+
+[node name="info" type="Label" parent="."]
+margin_left = -390.146
+margin_top = -567.961
+margin_right = 379.854
+margin_bottom = -553.961
+rect_scale = Vector2( 2.5, 2.5 )
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.25
+one_shot = true
+
+[node name="Lists" type="Node2D" parent="."]
+position = Vector2( -134.172, 56.3475 )
+scale = Vector2( 1.5, 1.5 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="ItemList" type="ItemList" parent="Lists"]
+margin_left = -170.628
+margin_top = -411.0
+margin_right = 61.3723
+margin_bottom = -144.0
+custom_colors/guide_color = Color( 0.278431, 0.290196, 0, 1 )
+custom_colors/font_color_selected = Color( 0.976471, 0.803922, 0.0235294, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+items = [ "Su", ExtResource( 6 ), false, "Su", ExtResource( 6 ), false ]
+select_mode = 1
+fixed_icon_size = Vector2( 35, 35 )
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="BASLIKPANELI" type="Panel" parent="Lists"]
+margin_left = -170.947
+margin_top = -153.312
+margin_right = -130.947
+margin_bottom = -113.312
+rect_scale = Vector2( 5.8, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Lists"]
+modulate = Color( 0.996078, 0.823529, 0.529412, 1 )
+margin_left = -110.948
+margin_top = -151.527
+margin_right = -56.9477
+margin_bottom = -137.527
+rect_scale = Vector2( 1.8, 1.8 )
+text = "~Simya~"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SimyaList" type="ItemList" parent="Lists"]
+anchor_top = -4.94
+anchor_bottom = -4.94
+margin_left = -170.812
+margin_top = -125.0
+margin_right = 60.188
+margin_bottom = 212.0
+custom_colors/guide_color = Color( 0.278431, 0.290196, 0, 1 )
+custom_colors/font_color_selected = Color( 0.976471, 0.803922, 0.0235294, 1 )
+custom_colors/font_color = Color( 1, 1, 1, 1 )
+items = [ "Basit Dayaniklilik Iksiri", ExtResource( 5 ), false, "Can Iksiri", ExtResource( 8 ), true, "Basit Can Iksiri", ExtResource( 4 ), true, "Dayaniklilik Iksiri", ExtResource( 7 ), true ]
+allow_reselect = true
+same_column_width = true
+fixed_icon_size = Vector2( 50, 50 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="Lists"]
+margin_left = 59.8823
+margin_top = -144.928
+margin_right = 305.882
+margin_bottom = -67.0
+rect_scale = Vector2( 2, 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sprite" type="Sprite" parent="Lists/Panel"]
+position = Vector2( 122.178, 42.2271 )
+scale = Vector2( 0.555597, 0.585302 )
+
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
+[connection signal="item_activated" from="Lists/ItemList" to="." method="_on_ItemList_item_activated"]
+[connection signal="item_activated" from="Lists/SimyaList" to="." method="_on_SimyaList_item_activated"]
+[connection signal="item_selected" from="Lists/SimyaList" to="." method="_on_SimyaList_item_selected"]
+[connection signal="mouse_exited" from="Lists/SimyaList" to="." method="_on_SimyaList_mouse_exited"]

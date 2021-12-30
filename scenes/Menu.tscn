@@ -1,0 +1,73 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Menu.gd" type="Script" id=1]
+[ext_resource path="res://enemies/crab/crab.glb" type="PackedScene" id=2]
+[ext_resource path="res://kaolzaogoch/main stuff/kaolzaogoch.glb" type="PackedScene" id=3]
+[ext_resource path="res://game.tres" type="Environment" id=4]
+[ext_resource path="res://scenes/tadilat.png" type="Texture" id=5]
+
+[sub_resource type="SpatialMaterial" id=1]
+albedo_color = Color( 1, 0.309804, 0.0392157, 1 )
+
+[node name="Menu" type="Spatial"]
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_vertical_guides_": [ 1920.24 ]
+}
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.126, 1.387, 3.102 )
+fov = 74.7
+
+[node name="kaolzaogoch" parent="." instance=ExtResource( 3 )]
+transform = Transform( 0, 0, -1, 0, 1, 0, 1, 0, 0, -1.02586, 0, 0 )
+
+[node name="AnimationPlayer" parent="kaolzaogoch" index="1"]
+autoplay = "running"
+playback_speed = 2.0
+
+[node name="crab" parent="." instance=ExtResource( 2 )]
+transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.18394, 0, 0 )
+
+[node name="crab" parent="crab/crab001/Skeleton" index="0"]
+material/0 = SubResource( 1 )
+
+[node name="AnimationPlayer" parent="crab" index="1"]
+autoplay = "walk_loop"
+playback_speed = 1.5
+
+[node name="Button" type="Button" parent="."]
+margin_left = 240.0
+margin_top = 644.909
+margin_right = 482.0
+margin_bottom = 747.909
+text = "Basla"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource( 4 )
+
+[node name="Label" type="Label" parent="."]
+margin_left = 120.0
+margin_top = 112.0
+margin_right = 331.0
+margin_bottom = 126.0
+rect_scale = Vector2( 8, 8 )
+text = "KAOLZAOGOCH'UN MACERALARI"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Sprite" type="Sprite" parent="."]
+visible = false
+position = Vector2( 444.549, 788.125 )
+rotation = -0.427606
+scale = Vector2( 0.580691, 0.50643 )
+texture = ExtResource( 5 )
+
+[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
+
+[editable path="kaolzaogoch"]
+[editable path="crab"]
