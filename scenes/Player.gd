@@ -54,9 +54,7 @@ func _unhandled_input(event):
 func _physics_process(delta):
 	if frozen:
 		return
-	print(health_manager.cur_health)
 	hitbox.rotation.y = pivot.rotation.y #şimdilik böle
-	
 	var input_vector = get_input_vector()
 	var direction = get_direction(input_vector)
 	apply_movement(input_vector, direction, delta)
@@ -72,8 +70,8 @@ func _physics_process(delta):
 	spring_arm.rotation.x = clamp(spring_arm.rotation.x, deg2rad(-75), deg2rad(75))
 	velocity = move_and_slide_with_snap(velocity, snap_vector, Vector3.UP, true, 4, 0.785398, false)
 	$fps.text = str(Engine.get_frames_per_second())
-	for idx in get_slide_count():
-		var collision = get_slide_collision(idx)
+	for index in get_slide_count():
+		var collision = get_slide_collision(index)
 		if collision.collider.is_in_group("bodies"):
 			collision.collider.apply_central_impulse(-collision.normal * velocity.length() * push)
 	
@@ -94,7 +92,6 @@ func apply_movement(input_vector, direction, delta):
 	if direction != Vector3.ZERO:
 		velocity.x = velocity.move_toward(direction * max_speed, acceleration * delta).x
 		velocity.z = velocity.move_toward(direction * max_speed, acceleration * delta).z
-#		pivot.look_at(global_transform.origin + direction, Vector3.UP)
 		pivot.rotation.y = lerp_angle(pivot.rotation.y, atan2(-input_vector.x, -input_vector.z), rot_speed * delta)
 		
 func apply_friction(direction, delta):
@@ -104,16 +101,14 @@ func apply_friction(direction, delta):
 		else:
 			velocity.x = velocity.move_toward(direction * max_speed, air_friction * delta).x
 			velocity.z = velocity.move_toward(direction * max_speed, air_friction * delta).z
-		
+
 func apply_gravity(delta):
 	velocity.y += gravity * delta
 	velocity.y = clamp(velocity.y, gravity, jump_impulse)
-	
-	
+
 func update_snap_vector():
 	snap_vector = -get_floor_normal() if is_on_floor() else Vector3.DOWN
-	
-	
+
 func jump():
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		$AnimationTree.set("parameters/oneShotJump/active", true)

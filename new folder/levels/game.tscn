@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=2]
+[gd_scene load_steps=27 format=2]
 
 [ext_resource path="res://kaolzaogoch/main stuff/player_v2.tscn" type="PackedScene" id=1]
 [ext_resource path="res://enemies/crab/middleCrab.material" type="Material" id=2]
@@ -14,6 +14,7 @@
 [ext_resource path="res://maps/adacimbenim2.tscn" type="PackedScene" id=12]
 [ext_resource path="res://new folder/levels/game.gd" type="Script" id=13]
 [ext_resource path="res://collectables/mantar/collcMantar.tscn" type="PackedScene" id=14]
+[ext_resource path="res://enemies/crab/Material.material" type="Material" id=15]
 [ext_resource path="res://game.tres" type="Environment" id=16]
 
 [sub_resource type="SpatialMaterial" id=1]
@@ -201,175 +202,9 @@ func _on_Timer_timeout():
 	queue_free()
 "
 
-[sub_resource type="GDScript" id=7]
-script/source = "extends KinematicBody
-onready var yengecGozu = $YengecGozu
-
-onready var anim_player = $Mesh/crab/AnimationPlayer
-onready var health_manager = $HealthManager
-onready var character_mover = $CharacterMover
-onready var nav : Navigation = get_parent().get_parent()
-
-enum STATES {IDLE, CHASE, ATTACK, DEAD}
-var current_state = STATES.IDLE
-
-var player = null
-var path = []
-
-export var hasItem = false
-export var sight_angle = 45.0
-export var turn_speed = deg2rad(360.0)
-export var attack_range = 2.0
-export var attack_rate = 1.0
-export var damage = 10
-var attack_timer: Timer
-var can_attack = true
-
-signal attack
-
-func _ready():
-	$DamageArea.set_damage(damage)
-	crabEyeActivation(false)
-	attack_timer = Timer.new()
-	attack_timer.wait_time = attack_rate
-	attack_timer.connect(\"timeout\", self, \"finish_attack\")
-	attack_timer.one_shot = true
-	add_child(attack_timer)
-	
-	player = get_tree().get_nodes_in_group(\"player\")[0]
-	$Mesh/crab/crab001/Skeleton/BoneAttachment/HitBox.connect(\"hurt\", self, \"hurt\")
-	health_manager.connect(\"dead\", self, \"set_state_dead\")
-	character_mover.init(self)
-	set_state_idle()
-	
-
-func _process(delta):
-	match current_state:
-		STATES.IDLE:
-			process_state_idle(delta)
-		STATES.CHASE:
-			process_state_chase(delta)
-		STATES.ATTACK:
-			process_state_attack(delta)
-		STATES.DEAD:
-			process_state_dead(delta)
-
-func set_state_idle():
-	current_state = STATES.IDLE
-	anim_player.play(\"idle_loop\")
-
-func set_state_chase():
-	current_state = STATES.CHASE
-	anim_player.play(\"walk_loop\")
-
-func set_state_attack():
-	current_state = STATES.ATTACK
-
-func set_state_dead():
-	if hasItem:
-		crabEyeActivation(true)
-	current_state = STATES.DEAD
-	anim_player.play(\"die\")
-	character_mover.freeze()
-	$CollisionShape.disabled = true
-	$Timer.start()
-
-
-func process_state_idle(delta):
-	if can_see_player():
-		set_state_chase()
-
-func process_state_chase(delta):
-	if within_distance_of_player(attack_range) and has_los_player():
-		set_state_attack()
-	var player_pos = player.global_transform.origin
-	var our_pos = global_transform.origin
-	path = nav.get_simple_path(our_pos, player_pos)
-	var goal_pos = player_pos
-	if path.size() > 1:
-		goal_pos = path[1]
-	var dir = goal_pos - our_pos
-	dir.y = 0
-	character_mover.set_move_vec(dir)
-	face_dir(dir, delta)
-
-func process_state_attack(delta):
-	character_mover.set_move_vec(Vector3.ZERO)
-	 #face_dir(global_transform.origin.direction_to(player.global_transform.origin), delta)
-	if can_attack:
-		if !within_distance_of_player(attack_range) or !can_see_player():
-			set_state_chase()
-		else:
-			start_attack()
-
-func process_state_dead(delta):
-	pass
-
-func hurt(damage: int):
-	if current_state == STATES.IDLE:
-		set_state_chase()
-	health_manager.hurt(damage)
-	print(\"hi, we got hit: \", damage)
-
-func start_attack():
-	can_attack = false
-	anim_player.play(\"attack\")
-	attack_timer.start()
-
-func emit_attack_signal():
-	emit_signal(\"attack\")
-
-func finish_attack():
-	can_attack = true
-
-func can_see_player():
-	var dir_to_player = global_transform.origin.direction_to(player.global_transform.origin)
-	var forwards = global_transform.basis.z
-	return rad2deg(forwards.angle_to(dir_to_player)) < sight_angle and has_los_player()
-
-func has_los_player():
-	var our_pos = global_transform.origin + Vector3.UP #yerden itibaren taramasın diye yükselttik
-	var player_pos = player.global_transform.origin + Vector3.UP
-	
-	var space_state = get_world().get_direct_space_state()
-	var result = space_state.intersect_ray(our_pos, player_pos, [], 1)
-	if result:
-		return false
-	return true
-
-func face_dir(dir: Vector3, delta):
-	var angle_diff = global_transform.basis.z.angle_to(dir)
-	var turn_right = sign(global_transform.basis.x.dot(dir))
-	if abs(angle_diff) < turn_speed * delta:
-		rotation.y = atan2(dir.x, dir.z)
-	else:
-		rotation.y += turn_speed * delta * turn_right
-
-func alert(check_los=true):
-	if current_state != STATES.IDLE:
-		return
-	if check_los and !has_los_player():
-		return
-	set_state_chase()
-
-func within_distance_of_player(distance: float):
-	return global_transform.origin.distance_to(player.global_transform.origin) < attack_range
-
-func crabEyeActivation(var value):
-	yengecGozu.visible = value
-	yengecGozu.monitorable = value
-	yengecGozu.monitoring = value
-
-
-func _on_Timer_timeout():
-	queue_free()
-"
-
-[sub_resource type="SpatialMaterial" id=8]
-albedo_color = Color( 0.486275, 0.00392157, 0.501961, 1 )
-
-[sub_resource type="CylinderShape" id=9]
-height = 0.760098
+[sub_resource type="CylinderShape" id=13]
+radius = 1.46072
+height = 0.7
 
 [sub_resource type="BoxShape" id=10]
 extents = Vector3( 0.926427, 1, 1.32235 )
@@ -596,7 +431,7 @@ collision_mask = 3
 script = SubResource( 6 )
 
 [node name="middleCrab" parent="Navigation/ENEMIES" instance=ExtResource( 11 )]
-transform = Transform( -1.41152, 0, 1.4169, 0, 2, 0, -1.4169, 0, -1.41152, -207.694, 14.4537, 99.5792 )
+transform = Transform( -1.19979, 0, 1.20437, 0, 1.7, 0, -1.20437, 0, -1.19979, -207.694, 14.4537, 99.5792 )
 collision_mask = 3
 turn_speed = 5.0
 damage = 20
@@ -608,7 +443,7 @@ material/0 = ExtResource( 2 )
 max_health = 1200
 
 [node name="middleCrab2" parent="Navigation/ENEMIES" instance=ExtResource( 11 )]
-transform = Transform( -1.99488, 0, 0.142995, 0, 2, 0, -0.142995, 0, -1.99488, -219.274, 13.4089, 101.482 )
+transform = Transform( 0.33081, 0, 1.6675, 0, 1.7, 0, -1.6675, 0, 0.33081, -219.274, 13.4089, 101.482 )
 collision_mask = 3
 turn_speed = 5.0
 damage = 20
@@ -620,7 +455,7 @@ material/0 = ExtResource( 2 )
 max_health = 1200
 
 [node name="middleCrab3" parent="Navigation/ENEMIES" instance=ExtResource( 11 )]
-transform = Transform( -1.44212, 0, -1.38575, 0, 2, 0, 1.38575, 0, -1.44212, -100.632, 4.73948, 130.423 )
+transform = Transform( -1.2258, 0, -1.17789, 0, 1.7, 0, 1.17789, 0, -1.2258, -100.632, 4.73948, 130.423 )
 collision_mask = 3
 turn_speed = 5.0
 damage = 20
@@ -632,7 +467,7 @@ material/0 = ExtResource( 2 )
 max_health = 1200
 
 [node name="middleCrab4" parent="Navigation/ENEMIES" instance=ExtResource( 11 )]
-transform = Transform( -1.44212, 0, -1.38575, 0, 2, 0, 1.38575, 0, -1.44212, -111.385, 4.73948, 117.409 )
+transform = Transform( -1.2258, 0, -1.17789, 0, 1.7, 0, 1.17789, 0, -1.2258, -111.385, 4.73948, 117.409 )
 collision_mask = 3
 turn_speed = 5.0
 damage = 20
@@ -643,29 +478,24 @@ material/0 = ExtResource( 2 )
 [node name="HealthManager" parent="Navigation/ENEMIES/middleCrab4" index="2"]
 max_health = 1200
 
-[node name="BossCrab" parent="Navigation/ENEMIES" instance=ExtResource( 11 )]
-transform = Transform( 3, 0, 0, 0, 3, 0, 0, 0, 3, -87.7173, 4.52552, 129.749 )
+[node name="bossCrab" parent="Navigation/ENEMIES" instance=ExtResource( 11 )]
+transform = Transform( -0.599429, 0, 0.800428, 0, 1, 0, -0.800428, 0, -0.599429, -87.6294, 4.73948, 130.475 )
 collision_mask = 3
-script = SubResource( 7 )
 hasItem = true
-sight_angle = 65.0
-turn_speed = 3.3
-attack_rate = 2.0
+turn_speed = 5.0
 damage = 35
 
-[node name="crab" parent="Navigation/ENEMIES/BossCrab/Mesh/crab/crab001/Skeleton" index="0"]
-material/0 = SubResource( 8 )
+[node name="CollisionShape" parent="Navigation/ENEMIES/bossCrab" index="0"]
+shape = SubResource( 13 )
 
-[node name="CollisionShape" parent="Navigation/ENEMIES/BossCrab/Mesh/crab/crab001/Skeleton/BoneAttachment/HitBox" index="0"]
-transform = Transform( 1, 0, 0, 0, -1, -8.74228e-08, 0, 8.74228e-08, -1, 0, 0.462952, 0 )
-shape = SubResource( 9 )
+[node name="Mesh" parent="Navigation/ENEMIES/bossCrab" index="1"]
+transform = Transform( 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0 )
 
-[node name="HealthManager" parent="Navigation/ENEMIES/BossCrab" index="2"]
+[node name="crab" parent="Navigation/ENEMIES/bossCrab/Mesh/crab/crab001/Skeleton" index="0"]
+material/0 = ExtResource( 15 )
+
+[node name="HealthManager" parent="Navigation/ENEMIES/bossCrab" index="2"]
 max_health = 3000
-
-[node name="CharacterMover" parent="Navigation/ENEMIES/BossCrab" index="3"]
-move_accel = 1
-max_speed = 5
 
 [node name="Player_v2" parent="." instance=ExtResource( 1 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -60.8702, 13.6402, 38.2386 )
@@ -800,7 +630,6 @@ one_shot = true
 wait_time = 0.3
 one_shot = true
 
-[connection signal="send_name_info" from="Navigation/ENEMIES/BossCrab/YengecGozu" to="info" method="_on_Collectables_send_name_info"]
 [connection signal="send_name_info" from="COLLECTABLES/Collectables" to="info" method="_on_Collectables_send_name_info"]
 [connection signal="send_name_info" from="COLLECTABLES/yosunlu_kaya4" to="info" method="_on_Collectables_send_name_info"]
 [connection signal="send_name_info" from="COLLECTABLES/yosunlu_kaya5" to="info" method="_on_Collectables_send_name_info"]
@@ -840,5 +669,5 @@ one_shot = true
 [editable path="Navigation/ENEMIES/middleCrab3/Mesh/crab"]
 [editable path="Navigation/ENEMIES/middleCrab4"]
 [editable path="Navigation/ENEMIES/middleCrab4/Mesh/crab"]
-[editable path="Navigation/ENEMIES/BossCrab"]
-[editable path="Navigation/ENEMIES/BossCrab/Mesh/crab"]
+[editable path="Navigation/ENEMIES/bossCrab"]
+[editable path="Navigation/ENEMIES/bossCrab/Mesh/crab"]

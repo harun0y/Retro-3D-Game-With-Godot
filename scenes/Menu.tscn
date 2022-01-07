@@ -1,10 +1,9 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Menu.gd" type="Script" id=1]
 [ext_resource path="res://enemies/crab/crab.glb" type="PackedScene" id=2]
 [ext_resource path="res://kaolzaogoch/main stuff/kaolzaogoch.glb" type="PackedScene" id=3]
 [ext_resource path="res://game.tres" type="Environment" id=4]
-[ext_resource path="res://scenes/tadilat.png" type="Texture" id=5]
 
 [sub_resource type="SpatialMaterial" id=1]
 albedo_color = Color( 1, 0.309804, 0.0392157, 1 )
@@ -59,13 +58,6 @@ text = "KAOLZAOGOCH'UN MACERALARI"
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="Sprite" type="Sprite" parent="."]
-visible = false
-position = Vector2( 444.549, 788.125 )
-rotation = -0.427606
-scale = Vector2( 0.580691, 0.50643 )
-texture = ExtResource( 5 )
 
 [connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
 

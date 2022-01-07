@@ -8,7 +8,6 @@ var drag = 0.0
 export var jump_force = 30
 export var gravity = 60
 
-var pressed_jump = false
 var move_vec : Vector3
 var velocity : Vector3
 var snap_vec : Vector3
@@ -24,9 +23,6 @@ func _ready():
 func init(_body_to_move: KinematicBody):
 	body_to_move = _body_to_move
 
-func jump():
-	pressed_jump = true
-
 func set_move_vec(_move_vec: Vector3):
 	move_vec = _move_vec.normalized()
 
@@ -40,14 +36,10 @@ func _physics_process(delta):
 	velocity = body_to_move.move_and_slide_with_snap(velocity, snap_vec, Vector3.UP)
 	
 	var grounded = body_to_move.is_on_floor()
+	
 	if grounded:
 		velocity.y = -0.01
-	if grounded and pressed_jump:
-		velocity.y = jump_force
-		snap_vec = Vector3.ZERO
-	else:
-		snap_vec = Vector3.DOWN
-	pressed_jump = false
+
 	emit_signal("movement_info", velocity, grounded)
 
 func freeze():

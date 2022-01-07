@@ -63,7 +63,7 @@ func set_state_attack():
 
 func set_state_dead():
 	if hasItem:
-		crabEyeActivation(true)
+		crabEyeActivation(hasItem)
 	current_state = STATES.DEAD
 	anim_player.play("die")
 	character_mover.freeze()
@@ -91,7 +91,6 @@ func process_state_chase(delta):
 
 func process_state_attack(delta):
 	character_mover.set_move_vec(Vector3.ZERO)
-	 #face_dir(global_transform.origin.direction_to(player.global_transform.origin), delta)
 	if can_attack:
 		if !within_distance_of_player(attack_range) or !can_see_player():
 			set_state_chase()
@@ -105,7 +104,6 @@ func hurt(damage: int):
 	if current_state == STATES.IDLE:
 		set_state_chase()
 	health_manager.hurt(damage)
-	print("hi, we got hit: ", damage)
 
 func start_attack():
 	can_attack = false
